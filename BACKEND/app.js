@@ -1,13 +1,26 @@
+const express= require("express");
+const dotenv=require("dotenv");
+const cookieParser= require("cookie-parser");
+const cors = require("cors");
 
-const express = require("express");
-const dotenv = require("dotenv");
+const connectDB= require("./Database/db.js");
+const userRoutes = require("./routes/User.routes.js");
 
+const app=express();
 dotenv.config();
-const connectDb = require("./Database/db.js");
 
-const app = express();
+app.use(
+    cors({
+        origin: "http://localhost:5173",
+        credentials: true,
+    })
+);
 
+app.use(express.json());
+app.use(cookieParser());
 
-connectDb();
+app.use('/user' , userRoutes);
 
-module.exports = app;
+connectDB();
+
+module.exports=app;
