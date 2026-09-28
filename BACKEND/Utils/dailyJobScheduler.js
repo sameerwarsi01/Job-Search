@@ -3,13 +3,13 @@ const User = require("../Models/user.model.js");
 const Job = require("../Models/job.models.js");
 const { sendJobAlertEmail } = require("./mailer.js");
 
-// Special characters (jaise C++) ko safely handle karne ke liye
+// Safely handle special characters (e.g., C++)
 const escapeRegex = (str) => {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 };
 
 const initDailyJobScheduler = () => {
-  // Har subah exact 9:00 AM IST par chalega
+// Runs daily at 9:00 AM IST
   cron.schedule(
     "0 9 * * *",
     async () => {

@@ -14,7 +14,6 @@ function AddJobModal({ isOpen, onClose, onAddJob, initialData = null }) {
     notes: "",
   });
 
-  // Agar edit click hua ho to form me existing data load karein
   useEffect(() => {
     if (initialData) {
       setFormData({

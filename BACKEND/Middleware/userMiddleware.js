@@ -22,7 +22,7 @@ module.exports.userAuthentication = async (req, res, next) => {
       });
     }
 
-    // ✅ FIX: process.env.key ya process.env.Key dono support karein
+    // ✅ FIX: Support both uppercase and camelCase/capitalized environment variable naming (process.env.key || process.env.Key)
     const secretKey = process.env.key || process.env.Key || process.env.JWT_SECRET;
     const decoded = jwt.verify(token, secretKey);
 

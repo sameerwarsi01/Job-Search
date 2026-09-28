@@ -56,7 +56,7 @@ function JobsTable({
 
   return (
     <div className="mt-6 sm:mt-8 w-full max-w-full overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs">
-      {/* Horizontal scroll container jo mobile screen par actions cut hone se rokega */}
+      {/* Horizontal scroll container to ensure all actions remain visible and accessible on mobile screens*/}
       <div className="w-full overflow-x-auto">
         <table className="w-full min-w-[850px] border-collapse text-left text-sm">
           <thead>

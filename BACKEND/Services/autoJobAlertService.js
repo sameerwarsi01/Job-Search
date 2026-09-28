@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Helper: Title aur description se real WorkMode detect karna
+// Helper: Detect actual work mode from the job title and description
 const detectWorkMode = (title = "", desc = "") => {
   const combined = `${title} ${desc}`.toLowerCase();
   if (combined.includes("hybrid")) return "Hybrid";
@@ -83,7 +83,7 @@ const runDailyMatchingJobAlerts = async () => {
       const matched = liveJobsPool.slice(0, 3); // Top 3 Indian matched jobs
 
       if (matched.length > 0) {
-        // Database mein save/update
+        // Database in save/update
         for (const job of matched) {
           await Job.findOneAndUpdate(
             { user: user._id, company: job.company, role: job.title },

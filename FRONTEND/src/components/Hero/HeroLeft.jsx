@@ -13,7 +13,7 @@ function HeroLeft() {
     );
   };
 
-  // 1. Upload Resume Button: Profile page par bhejega jahan resume upload logic hai
+  // 1. Upload Resume" button: redirects to the profile page containing resume upload logic
   const handleUploadResumeClick = () => {
     const token = getAuthToken();
     if (token) {
@@ -23,7 +23,7 @@ function HeroLeft() {
     }
   };
 
-  // 2. See How It Works Button: Dashboard overview par bhejega
+  // 2. See How It Works" button: redirects to the dashboard overview section
   const handleHowItWorksClick = () => {
     const token = getAuthToken();
     if (token) {
