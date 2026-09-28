@@ -6,6 +6,7 @@ const { validationResult } = require("express-validator");
 const blacklistToken = require("../Models/blaclistToken.model");
 
 module.exports.signUp = async (req, res) => {
+
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -103,13 +104,36 @@ module.exports.logout = async (req, res) =>{
             sameSite: "lax"
         });
 
-        return res.status(400).json({
+        return res.status(200).json({
             message: "Logout Succesfull"
         });
     }
     catch (err){
         return res.status(401).json({
             message: "Invalid Token"
+        });
+    }
+};
+
+module.exports.toggleJobAlerts = async (req, res) => {
+    try {
+        const user = req.user;
+        if(!user){
+            return res.status(404).json({ message: "User Not found" });
+        }
+
+        user.jobAlertsEnabled = user.jobAlertsEnabled === undefined ? false : !user.jobAlertsEnabled;
+        await user.save();
+
+        res.status(201).json({
+            success: true,
+            jobAlertsEnabled: user.jobAlertsEnabled,
+            message: `daily job alerts turned ${user.jobAlertsEnabled ? "ON" : "OFF"}`
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: "Failed to update alert preference",
+            error: error.message,
         });
     }
 }

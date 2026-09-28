@@ -1,6 +1,7 @@
 const User= require("../Models/user.model");
 const bcrypt = require("bcrypt");
 
+
 module.exports.createUser = async ({fullname , email , password}) =>{
     const userExist = await User.findOne({email});
 
@@ -9,6 +10,7 @@ module.exports.createUser = async ({fullname , email , password}) =>{
     }
 
     const hashPassword= await User.hashPassword(password);
+
 
     const user = await User.create({
         fullname,
@@ -31,6 +33,6 @@ module.exports.login = async ({email , password}) =>{
     if(!compare){
         throw new Error("Wrong Password");
     }
-
+    
     return ExistUser;
 }

@@ -3,45 +3,45 @@ const blacklistToken = require("../Models/blaclistToken.model");
 const UserModel = require("../Models/user.model");
 
 module.exports.userAuthentication = async (req, res, next) => {
-    try {
+  try {
+    const token =
+      req.cookies?.token ||
+      req.headers.authorization?.split(" ")[1];
 
-        const token =
-            req.cookies.token ||
-            req.headers.authorization?.split(" ")[1];
-
-
-        if (!token) {
-            return res.status(401).json({
-                message: "Unauthorized"
-            });
-        }
-
-        const isBlacklisted = await blacklistToken.findOne({ token });
-
-        if (isBlacklisted) {
-            return res.status(401).json({
-                message: "Unauthorized"
-            });
-        }
-
-        const decoded = jwt.verify(token, process.env.Key);
-
-        const user = await UserModel.findById(decoded._id);
-
-        if (!user) {
-            return res.status(401).json({
-            message: "Unauthorized"
-        });
-
-        res.user = user;
+    if (!token) {
+      return res.status(401).json({
+        message: "Unauthorized",
+      });
     }
 
-        next();
+    const isBlacklisted = await blacklistToken.findOne({ token });
 
-    } catch (err) {
-        console.log(err);
-        return res.status(401).json({
-            message: "Invalid Token"
-        });
+    if (isBlacklisted) {
+      return res.status(401).json({
+        message: "Unauthorized",
+      });
     }
+
+    // ✅ FIX: process.env.key ya process.env.Key dono support karein
+    const secretKey = process.env.key || process.env.Key || process.env.JWT_SECRET;
+    const decoded = jwt.verify(token, secretKey);
+
+    const user = await UserModel.findById(decoded._id);
+
+    if (!user) {
+      return res.status(401).json({
+        message: "Unauthorized",
+      });
+    }
+
+    // Attach user to req object
+    req.user = user;
+
+    next();
+  } catch (err) {
+    console.log("Middleware Auth Error:", err.message);
+    return res.status(401).json({
+      message: "Invalid Token",
+    });
+  }
 };

@@ -23,4 +23,10 @@ router.post('/login' , [
 
 router.post('/logout' , middleWare.userAuthentication , userController.logout);
 
+router.patch(
+    "/toggle-job-alerts",
+    middleWare.userAuthentication,
+    userController.toggleJobAlerts,
+);
+
 module.exports=router;
