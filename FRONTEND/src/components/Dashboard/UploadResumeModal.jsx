@@ -132,7 +132,7 @@ function UploadResumeModal({ isOpen, onClose, onScoreUpdate }) {
       formData.append("stream", selectedCategory);
       if (userId) formData.append("userId", userId);
 
-      const res = await axios.post("http://localhost:3000/api/resume/upload", formData, {
+      const res = await axios.post("https://job-search-xhey.onrender.com/api/resume/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),

@@ -56,7 +56,7 @@ function PricingModal({ isOpen, onClose, onUpgradeSuccess, onComplete, plan }) {
       }
 
       const res = await axios.post(
-        "http://localhost:3000/api/payment/mock-checkout",
+        "https://job-search-xhey.onrender.com/api/payment/mock-checkout",
         {
           planName: plan.name,
           amount: plan.amount,

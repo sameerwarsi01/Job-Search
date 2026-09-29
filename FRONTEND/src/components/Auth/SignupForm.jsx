@@ -41,7 +41,7 @@ const handleSubmit = async (e) => {
 
     try {
         const response = await axios.post(
-            "http://localhost:3000/user/signup",
+            "https://job-search-xhey.onrender.com/user/signup",
             {
                 fullname: {
                     firstname: formData.firstname,

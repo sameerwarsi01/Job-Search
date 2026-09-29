@@ -13,9 +13,9 @@ import RecentActivity from "../components/Dashboard/RecentActivity";
 import QuickActions from "../components/Dashboard/QuickActions";
 import UploadResumeModal from "../components/Dashboard/UploadResumeModal";
 
-const JOBS_API = "http://localhost:3000/api/jobs";
-const INTERVIEWS_API = "http://localhost:3000/api/interviews";
-const TOGGLE_ALERT_API = "http://localhost:3000/user/toggle-job-alerts";
+const JOBS_API = "https://job-search-xhey.onrender.com/api/jobs";
+const INTERVIEWS_API = "https://job-search-xhey.onrender.com/api/interviews";
+const TOGGLE_ALERT_API = "https://job-search-xhey.onrender.com/user/toggle-job-alerts";
 
 function Dashboard() {
   const [jobs, setJobs] = useState([]);

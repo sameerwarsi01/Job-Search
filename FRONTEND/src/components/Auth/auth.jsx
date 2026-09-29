@@ -22,7 +22,7 @@ export const handleUserLogout = async (navigate) => {
   try {
     // Backend cookie / session revoke (agar set ho)
     await axios.post(
-      "http://localhost:3000/user/logout",
+      "https://job-search-xhey.onrender.com/user/logout",
       {},
       { withCredentials: true }
     );

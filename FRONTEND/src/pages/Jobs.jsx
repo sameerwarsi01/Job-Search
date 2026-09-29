@@ -7,7 +7,7 @@ import AddJobModal from "../components/Jobs/AddJobModal";
 import ViewJobModal from "../components/Jobs/ViewJobModal";
 import { FiRefreshCw, FiZap, FiBriefcase, FiPlus } from "react-icons/fi";
 
-const API_URL = "http://localhost:3000/api/jobs";
+const API_URL = "https://job-search-xhey.onrender.com/api/jobs";
 
 function Jobs() {
   const [jobs, setJobs] = useState([]);

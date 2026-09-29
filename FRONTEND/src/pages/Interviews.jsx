@@ -9,7 +9,7 @@ import {
   FiExternalLink,
 } from "react-icons/fi";
 
-const API_URL = "http://localhost:3000/api/interviews";
+const API_URL = "https://job-search-xhey.onrender.com/api/interviews";
 
 function Interviews() {
   const [interviews, setInterviews] = useState([]);

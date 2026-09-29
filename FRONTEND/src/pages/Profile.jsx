@@ -97,7 +97,7 @@ function Profile() {
         },
       };
 
-      const res = await axios.post("http://localhost:3000/api/resume/upload", formData, config);
+      const res = await axios.post("https://job-search-xhey.onrender.com/api/resume/upload", formData, config);
 
       if (res.data.success) {
         const extracted = res.data.data;

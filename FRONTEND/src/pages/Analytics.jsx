@@ -10,8 +10,8 @@ import {
   FiClock,
 } from "react-icons/fi";
 
-const JOBS_API = "http://localhost:3000/api/jobs";
-const INTERVIEWS_API = "http://localhost:3000/api/interviews";
+const JOBS_API = "https://job-search-xhey.onrender.com/api/jobs";
+const INTERVIEWS_API = "https://job-search-xhey.onrender.com/api/interviews";
 
 function Analytics() {
   const [jobs, setJobs] = useState([]);

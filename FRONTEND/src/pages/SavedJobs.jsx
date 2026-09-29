@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { FiBookmark, FiExternalLink, FiTrash2, FiBriefcase, FiMapPin } from "react-icons/fi";
 
-const API_BASE = "http://localhost:3000/api/jobs";
+const API_BASE = "https://job-search-xhey.onrender.com/api/jobs";
 
 function SavedJobs() {
   const [savedJobs, setSavedJobs] = useState([]);

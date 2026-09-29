@@ -14,15 +14,26 @@ const paymentRoutes = require("./routes/payment.routes.js");
 
 const app = express();
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://job-search-liard-sigma.vercel.app"
+];
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // Form/Body stream read karne ke liye zaroori
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Route Mounts
