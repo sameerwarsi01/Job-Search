@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import SearchFilter from "../components/Jobs/SearchFilter";
 import JobFilters from "../components/Jobs/JobFilters";
 import JobStats from "../components/Jobs/JobStats";
 import JobsTable from "../components/Jobs/JobsTable";
 import AddJobModal from "../components/Jobs/AddJobModal";
 import ViewJobModal from "../components/Jobs/ViewJobModal";
-import { FiRefreshCw, FiZap, FiBriefcase, FiPlus } from "react-icons/fi";
+import { FiRefreshCw, FiZap, FiBriefcase, FiPlus, FiFileText } from "react-icons/fi";
 
 const API_URL = "https://job-search-xhey.onrender.com/api/jobs";
 
@@ -17,6 +18,7 @@ function Jobs() {
   const [editingJob, setEditingJob] = useState(null);
   const [viewingJob, setViewingJob] = useState(null);
   const [activeProfile, setActiveProfile] = useState({ role: "", category: "" });
+  const [hasDomainOrResume, setHasDomainOrResume] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("All");
@@ -56,19 +58,28 @@ function Jobs() {
     } catch (error) {
       console.error("Error fetching jobs:", error);
       return [];
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleAutoSyncJobs = async (isSilent = false) => {
+    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+    const userRole =
+      storedUser.targetRole ||
+      storedUser.resumeInfo?.domain ||
+      storedUser.role ||
+      "";
+    const userSkills = storedUser.skills || storedUser.resumeInfo?.skills || [];
+    const userCategory = storedUser.category || storedUser.stream || "";
+
+    if (!userRole && userSkills.length === 0) {
+      if (!isSilent) {
+        alert("Please upload your resume or set your domain first to sync matching jobs!");
+      }
+      return;
+    }
+
     if (!isSilent) setSyncing(true);
     try {
-      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-      const userSkills = storedUser.skills || storedUser.resumeInfo?.skills || [];
-      const userRole = storedUser.targetRole || "Full Stack Developer";
-      const userCategory = storedUser.category || storedUser.stream || "software_it";
-
       setActiveProfile({ role: userRole, category: userCategory });
 
       const res = await fetch(`${API_URL}/sync-matched`, {
@@ -92,12 +103,12 @@ function Jobs() {
       }
 
       if (!isSilent) {
-        alert(data.message || `Matched jobs loaded for ${userRole}!`);
+        alert(data.message || `Fresh jobs synced for ${userRole || "your domain"}!`);
       }
     } catch (error) {
       console.error("Failed to sync resume matched jobs:", error);
       if (!isSilent) {
-        alert("Failed to fetch live jobs from backend.");
+        alert("Failed to sync live jobs from Adzuna.");
       }
     } finally {
       if (!isSilent) setSyncing(false);
@@ -105,21 +116,54 @@ function Jobs() {
   };
 
   useEffect(() => {
+    let isMounted = true;
+
     const initializeJobs = async () => {
-      await fetchJobs();
+      try {
+        const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+        const userRole =
+          storedUser.targetRole ||
+          storedUser.resumeInfo?.domain ||
+          storedUser.role ||
+          "";
+        const userSkills = storedUser.skills || storedUser.resumeInfo?.skills || [];
+        const hasResume = Boolean(
+          storedUser.resumeInfo?.fileName ||
+          storedUser.resumeUrl ||
+          (userSkills && userSkills.length > 0) ||
+          (storedUser.stream && storedUser.stream.trim() !== "")
+        );
 
-      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-      if (storedUser.targetRole) {
-        setActiveProfile({
-          role: storedUser.targetRole,
-          category: storedUser.category || "",
-        });
+        if (!isMounted) return;
+
+        setHasDomainOrResume(hasResume);
+
+        if (userRole) {
+          setActiveProfile({
+            role: userRole,
+            category: storedUser.category || storedUser.stream || "",
+          });
+        }
+
+        if (hasResume) {
+          await handleAutoSyncJobs(true);
+        } else {
+          setJobs([]);
+        }
+      } catch (err) {
+        console.error("Initialization error:", err);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
-
-      handleAutoSyncJobs(true);
     };
 
     initializeJobs();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const openModal = () => {
@@ -242,54 +286,75 @@ function Jobs() {
   };
 
   const filteredJobs = jobs.filter((job) => {
+    const rawCompany =
+      typeof job.company === "object" && job.company !== null
+        ? job.company.name || ""
+        : job.company || job.companyName || "";
+
+    const rawRole =
+      typeof job.role === "object" && job.role !== null
+        ? job.role.title || ""
+        : job.role || job.title || "";
+
+    const rawLocation =
+      typeof job.location === "object" && job.location !== null
+        ? job.location.city || ""
+        : job.location || "";
+
+    const companyName = String(rawCompany).toLowerCase().trim();
+    const roleTitle = String(rawRole).toLowerCase().trim();
+    const jobLocation = String(rawLocation).toLowerCase().trim();
+
     const searchLower = searchTerm.toLowerCase().trim();
     const matchesSearch =
       !searchLower ||
-      (job.company?.toLowerCase() || "").includes(searchLower) ||
-      (job.role?.toLowerCase() || "").includes(searchLower) ||
-      (job.location?.toLowerCase() || "").includes(searchLower);
+      companyName.includes(searchLower) ||
+      roleTitle.includes(searchLower) ||
+      jobLocation.includes(searchLower);
 
     const matchesStatus =
       selectedStatus === "All" ||
-      job.status?.toLowerCase() === selectedStatus.toLowerCase();
+      String(job.status || "").toLowerCase() === selectedStatus.toLowerCase();
 
     if (!matchesSearch || !matchesStatus) return false;
 
-    if (
-      filters.company &&
-      !job.company?.toLowerCase().includes(filters.company.toLowerCase().trim())
-    ) {
-      return false;
+    if (filters?.company && filters.company.trim() !== "") {
+      const queryCompany = filters.company.toLowerCase().trim();
+      if (!companyName.includes(queryCompany)) return false;
     }
 
-    if (
-      filters.role &&
-      !job.role?.toLowerCase().includes(filters.role.toLowerCase().trim())
-    ) {
-      return false;
+    if (filters?.role && filters.role.trim() !== "") {
+      const queryRole = filters.role.toLowerCase().trim();
+      if (!roleTitle.includes(queryRole)) return false;
     }
 
-    const jobTypeVal = (filters.jobType || "All").toLowerCase();
+    const jobTypeVal = (filters?.jobType || "All").toLowerCase();
     if (jobTypeVal !== "all") {
-      const isIntern =
-        (job.role || "").toLowerCase().includes("intern") ||
-        (job.jobType || "").toLowerCase().includes("intern");
+      const combinedType = (
+        roleTitle + " " + String(job.jobType || "")
+      ).toLowerCase();
+      const isIntern = combinedType.includes("intern");
 
       if (jobTypeVal.includes("intern") && !isIntern) return false;
       if (jobTypeVal.includes("full") && isIntern) return false;
     }
 
-    const workModeVal = (filters.workMode || "All").toLowerCase();
+    const workModeVal = (filters?.workMode || "All").toLowerCase();
     if (workModeVal !== "all") {
-      const isRemote =
-        (job.location || "").toLowerCase().includes("remote") ||
-        (job.workMode || "").toLowerCase().includes("remote");
+      const combinedMode = (
+        jobLocation + " " + String(job.workMode || "")
+      ).toLowerCase();
+      const isRemote = combinedMode.includes("remote");
 
       if (workModeVal.includes("remote") && !isRemote) return false;
-      if ((workModeVal.includes("site") || workModeVal.includes("hybrid")) && isRemote) return false;
+      if (
+        (workModeVal.includes("site") || workModeVal.includes("hybrid")) &&
+        isRemote
+      )
+        return false;
     }
 
-    const dateFilterVal = (filters.datePosted || "All").toLowerCase();
+    const dateFilterVal = (filters?.datePosted || "All").toLowerCase();
     if (dateFilterVal !== "all" && dateFilterVal !== "any time") {
       const rawDate = job.postedAt || job.createdAt;
       const parsedDate = rawDate ? new Date(rawDate) : null;
@@ -297,9 +362,21 @@ function Jobs() {
       if (parsedDate && !isNaN(parsedDate.getTime())) {
         const diffHours = (Date.now() - parsedDate.getTime()) / (1000 * 60 * 60);
 
-        if ((dateFilterVal.includes("24") || dateFilterVal === "24h") && diffHours > 24) return false;
-        if ((dateFilterVal.includes("week") || dateFilterVal === "7d") && diffHours > 24 * 7) return false;
-        if ((dateFilterVal.includes("month") || dateFilterVal === "30d") && diffHours > 24 * 30) return false;
+        if (
+          (dateFilterVal.includes("24") || dateFilterVal === "24h") &&
+          diffHours > 24
+        )
+          return false;
+        if (
+          (dateFilterVal.includes("week") || dateFilterVal === "7d") &&
+          diffHours > 24 * 7
+        )
+          return false;
+        if (
+          (dateFilterVal.includes("month") || dateFilterVal === "30d") &&
+          diffHours > 24 * 30
+        )
+          return false;
       }
     }
 
@@ -312,10 +389,16 @@ function Jobs() {
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-800">Applications</h1>
-            {activeProfile.role && (
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-800">
+              Applications
+            </h1>
+            {activeProfile.role ? (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-100 px-3 py-0.5 text-xs font-semibold text-violet-700">
                 <FiBriefcase size={13} /> {activeProfile.role}
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-0.5 text-xs font-semibold text-slate-600">
+                <FiBriefcase size={13} /> No Domain Set
               </span>
             )}
           </div>
@@ -361,14 +444,72 @@ function Jobs() {
       <JobFilters
         filters={filters}
         setFilters={setFilters}
-        onReset={() => setFilters(defaultFilters)}
+        onReset={() => {
+          setFilters(defaultFilters);
+          setSearchTerm("");
+          fetchJobs();
+        }}
       />
 
-      <JobStats jobs={filteredJobs} />
+      {/* Stats Cards: Jab domain/resume set ho tabhi dikhayein */}
+      {hasDomainOrResume && <JobStats jobs={filteredJobs} />}
 
+      {/* Main Content Area */}
       {loading ? (
         <div className="mt-8 text-center text-slate-500 font-medium">
           Loading applications...
+        </div>
+      ) : !hasDomainOrResume ? (
+        /* State 1: No Resume / Domain Set */
+        <div className="mt-8 rounded-3xl border border-dashed border-slate-200 bg-white p-12 text-center shadow-sm">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-violet-50 text-violet-600">
+            <FiFileText size={28} />
+          </div>
+          <h3 className="text-lg font-bold text-slate-800">
+            No Domain Matched Yet
+          </h3>
+          <p className="mx-auto mt-2 max-w-md text-xs sm:text-sm text-slate-500 leading-relaxed">
+            Upload your resume or set your domain in Profile so our engine can fetch daily updated live jobs matching your career stream.
+          </p>
+          <div className="mt-6">
+            <Link
+              to="/profile"
+              className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition hover:bg-violet-700"
+            >
+              Upload Resume
+            </Link>
+          </div>
+        </div>
+      ) : filteredJobs.length === 0 ? (
+        /* State 2: Filter/Search yielded 0 matches */
+        <div className="mt-8 rounded-2xl border border-dashed border-slate-200 p-10 text-center bg-white shadow-sm">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-violet-50 text-violet-600 mb-3">
+            <FiBriefcase size={24} />
+          </div>
+          <h3 className="text-base font-bold text-slate-800">
+            No Applications Found
+          </h3>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-md mx-auto">
+            No jobs match your current filter criteria. Try resetting filters or sync again.
+          </p>
+          <div className="mt-5 flex items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setFilters(defaultFilters);
+                setSearchTerm("");
+              }}
+              className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+            >
+              Reset Filters
+            </button>
+            <Link
+              to="/profile"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-violet-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-violet-700"
+            >
+              Upload / Update Resume
+            </Link>
+          </div>
         </div>
       ) : (
         <JobsTable

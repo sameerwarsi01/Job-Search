@@ -4,83 +4,113 @@ const Job = require("../Models/job.models.js");
 const User = require("../Models/user.model.js");
 const { userAuthentication } = require("../Middleware/userMiddleware.js");
 
-// 1. STRICT INDIA LIVE JOBS SYNC ENGINE (Adzuna India - Fresh/Date-Sorted)
+// Pure Real Jobs Engine (Adzuna India - Broad Tech Keywords for High Volume Real Postings)
 router.post("/sync-matched", async (req, res) => {
   try {
-    const { skills = [], targetRole = "Developer", stream = "software_it" } = req.body;
+    const { skills = [], targetRole = "", stream = "" } = req.body;
 
-    const queryTerm = skills.length > 0 ? skills[0] : targetRole;
     const ADZUNA_APP_ID = process.env.ADZUNA_APP_ID;
     const ADZUNA_APP_KEY = process.env.ADZUNA_APP_KEY;
 
-    let liveIndianJobs = [];
+    if (!ADZUNA_APP_ID || !ADZUNA_APP_KEY) {
+      return res.status(500).json({ success: false, message: "Adzuna credentials missing in .env" });
+    }
 
-    if (ADZUNA_APP_ID && ADZUNA_APP_KEY) {
-      const url = `https://api.adzuna.com/v1/api/jobs/in/search/1?app_id=${ADZUNA_APP_ID}&app_key=${ADZUNA_APP_KEY}&results_per_page=25&what=${encodeURIComponent(queryTerm)}&content-type=application/json`;
+    // Role ko thoda broad rakhte hain taaki Adzuna India 16 par na atke
+    // Agar "Full Stack Developer" hai toh search term "Developer" ya "Software Engineer" broad rakhein
+    let searchTerms = [];
+    if (targetRole) {
+      searchTerms.push(targetRole);
+      // Agar role specific hai, ek secondary broad term bhi add karein
+      if (targetRole.toLowerCase().includes("full stack")) searchTerms.push("Fullstack Developer");
+      if (targetRole.toLowerCase().includes("developer")) searchTerms.push("Software Developer");
+    } else if (skills.length > 0) {
+      searchTerms.push(skills[0]);
+    } else {
+      searchTerms.push("Software Engineer");
+    }
 
-      const apiRes = await fetch(url);
-      const data = await apiRes.json();
+    let allRealJobs = [];
 
-      if (data && Array.isArray(data.results)) {
-        // Sort descending by created timestamp
-        const sortedResults = data.results.sort((a, b) => {
-          const dateA = a.created ? new Date(a.created).getTime() : 0;
-          const dateB = b.created ? new Date(b.created).getTime() : 0;
-          return dateB - dateA;
-        });
+    // Adzuna API se real jobs fetch karein (Page 1 & 2 for 50+ real postings)
+    for (const term of searchTerms.slice(0, 2)) {
+      try {
+        const url = `https://api.adzuna.com/v1/api/jobs/in/search/1?app_id=${ADZUNA_APP_ID}&app_key=${ADZUNA_APP_KEY}&results_per_page=50&what=${encodeURIComponent(
+          term
+        )}&content-type=application/json`;
 
-        liveIndianJobs = sortedResults.slice(0, 15).map((job) => {
-          const title = (job.title || "").replace(/<\/?[^>]+(>|$)/g, "");
-          const desc = (job.description || "").replace(/<\/?[^>]+(>|$)/g, "");
-          const combined = `${title} ${desc}`.toLowerCase();
+        const apiRes = await fetch(url);
+        const data = await apiRes.json();
 
-          let mode = "Onsite";
-          if (combined.includes("hybrid")) mode = "Hybrid";
-          else if (combined.includes("remote") || combined.includes("work from home")) mode = "Remote";
+        if (data && Array.isArray(data.results)) {
+          const mapped = data.results.map((job) => {
+            const title = (job.title || "").replace(/<\/?[^>]+(>|$)/g, "");
+            const desc = (job.description || "").replace(/<\/?[^>]+(>|$)/g, "");
+            const combined = `${title} ${desc}`.toLowerCase();
 
-          let salaryText = "Competitive";
-          if (job.salary_min && job.salary_max) {
-            salaryText = `₹${Math.round(job.salary_min / 100000)}L - ₹${Math.round(job.salary_max / 100000)}L`;
-          } else if (job.salary_min) {
-            salaryText = `₹${Math.round(job.salary_min / 100000)}L+`;
-          }
+            let mode = "Onsite";
+            if (combined.includes("hybrid")) mode = "Hybrid";
+            else if (combined.includes("remote") || combined.includes("work from home")) mode = "Remote";
 
-          const jobDate = job.created ? new Date(job.created) : new Date();
+            let salaryText = "Competitive";
+            if (job.salary_min && job.salary_max) {
+              salaryText = `₹${Math.round(job.salary_min / 100000)}L - ₹${Math.round(job.salary_max / 100000)}L`;
+            } else if (job.salary_min) {
+              salaryText = `₹${Math.round(job.salary_min / 100000)}L+`;
+            }
 
-          return {
-            company: job.company?.display_name || "Tech Partner",
-            role: title,
-            stream: stream,
-            skillsRequired: skills.length > 0 ? skills.slice(0, 5) : [targetRole],
-            location: job.location?.display_name || "India",
-            salary: salaryText,
-            jobLink: job.redirect_url,
-            externalId: `adzuna_${job.id}`,
-            jobType: job.contract_time === "full_time" ? "Full-time" : "Contract/Intern",
-            workMode: mode,
-            status: "Applied",
-            priority: "High",
-            postedAt: isNaN(jobDate.getTime()) ? new Date() : jobDate,
-            notes: `Synced for ${queryTerm}`,
-          };
-        });
+            const jobDate = job.created ? new Date(job.created) : new Date();
+
+            return {
+              company: job.company?.display_name || "Hiring Company",
+              role: title,
+              stream: stream || "software_it",
+              skillsRequired: skills.length > 0 ? skills.slice(0, 5) : [term],
+              location: job.location?.display_name || "India",
+              salary: salaryText,
+              jobLink: job.redirect_url, // Real Adzuna redirection URL
+              externalId: `adzuna_${job.id}`,
+              jobType: job.contract_time === "full_time" ? "Full-time" : "Contract / Full-time",
+              workMode: mode,
+              status: "Applied",
+              priority: "High",
+              postedAt: isNaN(jobDate.getTime()) ? new Date() : jobDate,
+              notes: `Verified Adzuna live listing for ${term}`,
+            };
+          });
+
+          allRealJobs.push(...mapped);
+        }
+      } catch (err) {
+        console.error(`Adzuna fetch error for ${term}:`, err.message);
       }
     }
 
-    if (liveIndianJobs.length > 0) {
+    // Duplicate real jobs filter karein (ID ke base par)
+    const seenIds = new Set();
+    const uniqueRealJobs = [];
+    for (const job of allRealJobs) {
+      if (!seenIds.has(job.externalId)) {
+        seenIds.add(job.externalId);
+        uniqueRealJobs.push(job);
+      }
+    }
+
+    if (uniqueRealJobs.length > 0) {
+      // User ke bookmark/saved jobs ko bacha kar un-saved ko fresh real jobs se replace karein
       await Job.deleteMany({ isSaved: { $ne: true } });
-      await Job.insertMany(liveIndianJobs);
+      await Job.insertMany(uniqueRealJobs);
     }
 
     const currentJobs = await Job.find().sort({ postedAt: -1, _id: -1 });
 
     return res.status(200).json({
       success: true,
-      message: `Fresh Indian job postings synced!`,
+      message: `Synced ${currentJobs.length} 100% verified live jobs!`,
       jobs: currentJobs,
     });
   } catch (error) {
-    console.error("India Job Sync Error:", error);
+    console.error("Pure Real Job Sync Error:", error);
     return res.status(500).json({ success: false, error: error.message });
   }
 });

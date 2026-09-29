@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -61,11 +61,11 @@ function App() {
       <Route
         path="/interviews"
         element={
-        <ProtectedRoute>
-        <Interviews />
-        </ProtectedRoute>
-       }
-     />
+          <ProtectedRoute>
+            <Interviews />
+          </ProtectedRoute>
+        }
+      />
 
       <Route
         path="/profile"
@@ -76,14 +76,24 @@ function App() {
         }
       />
 
+      {/* Resume Upload Redirect to Profile */}
+      <Route
+        path="/resume"
+        element={
+          <ProtectedRoute>
+            <Navigate to="/profile" replace />
+          </ProtectedRoute>
+        }
+      />
+
       <Route
         path="/settings"
         element={
-        <ProtectedRoute>
-        <Settings />
-        </ProtectedRoute>
-       }
-     />
+          <ProtectedRoute>
+            <Settings />
+          </ProtectedRoute>
+        }
+      />
 
       {/* 404 */}
       <Route path="*" element={<NotFound />} />

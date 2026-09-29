@@ -1,9 +1,12 @@
 import React from "react";
-import { FiSearch, FiBriefcase, FiMapPin, FiCalendar, FiRotateCcw } from "react-icons/fi";
+import { FiSearch, FiBriefcase, FiRotateCcw } from "react-icons/fi";
 
 function JobFilters({ filters, setFilters, onReset }) {
   const handleChange = (field, value) => {
-    setFilters((prev) => ({ ...prev, [field]: value }));
+    setFilters((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
 
   return (
@@ -13,6 +16,7 @@ function JobFilters({ filters, setFilters, onReset }) {
           Filter & Job Preferences
         </span>
         <button
+          type="button"
           onClick={onReset}
           className="flex items-center gap-1 text-xs text-violet-600 hover:text-violet-700 font-medium transition cursor-pointer"
         >
@@ -28,7 +32,7 @@ function JobFilters({ filters, setFilters, onReset }) {
           <input
             type="text"
             placeholder="Search Company..."
-            value={filters.company}
+            value={filters?.company || ""}
             onChange={(e) => handleChange("company", e.target.value)}
             className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-400"
           />
@@ -40,7 +44,7 @@ function JobFilters({ filters, setFilters, onReset }) {
           <input
             type="text"
             placeholder="Role / Title..."
-            value={filters.role}
+            value={filters?.role || ""}
             onChange={(e) => handleChange("role", e.target.value)}
             className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-400"
           />
@@ -49,7 +53,7 @@ function JobFilters({ filters, setFilters, onReset }) {
         {/* 3. Job Type (Full-Time vs Internship) */}
         <div>
           <select
-            value={filters.jobType}
+            value={filters?.jobType || "All"}
             onChange={(e) => handleChange("jobType", e.target.value)}
             className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 cursor-pointer"
           >
@@ -62,7 +66,7 @@ function JobFilters({ filters, setFilters, onReset }) {
         {/* 4. Work Mode (Remote vs On-site) */}
         <div>
           <select
-            value={filters.workMode}
+            value={filters?.workMode || "All"}
             onChange={(e) => handleChange("workMode", e.target.value)}
             className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 cursor-pointer"
           >
@@ -75,7 +79,7 @@ function JobFilters({ filters, setFilters, onReset }) {
         {/* 5. Date Posted */}
         <div>
           <select
-            value={filters.datePosted}
+            value={filters?.datePosted || "All"}
             onChange={(e) => handleChange("datePosted", e.target.value)}
             className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 cursor-pointer"
           >
