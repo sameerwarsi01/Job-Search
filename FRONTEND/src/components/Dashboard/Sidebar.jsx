@@ -58,16 +58,29 @@ function Sidebar({ isOpen = false, onClose = () => {} }) {
     const confirmLogout = window.confirm("Are you sure you want to log out?");
     if (!confirmLogout) return;
 
+    const token =
+      localStorage.getItem("token") ||
+      localStorage.getItem("userToken") ||
+      JSON.parse(localStorage.getItem("user") || "{}")?.token;
+
     try {
-      await axios.post(
-        "https://job-search-xhey.onrender.com/user/logout",
-        {},
-        { withCredentials: true }
-      );
-    } catch (err) {
-      console.warn("Backend logout warning:", err.message);
+      if (token) {
+        await axios.post(
+          "https://job-search-xhey.onrender.com/user/logout",
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            withCredentials: true,
+          }
+        );
+      }
+    } catch {
+      // Silent exit taaki console clean rahe
     } finally {
       localStorage.removeItem("token");
+      localStorage.removeItem("userToken");
       localStorage.removeItem("user");
       sessionStorage.clear();
       navigate("/login", { replace: true });

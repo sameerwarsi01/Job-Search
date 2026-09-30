@@ -113,119 +113,109 @@ function SignupForm({ isSignup }) {
   };
 
   return (
-    <motion.div
-      animate={{
-        x: isSignup ? "0%" : "100%",
-        opacity: isSignup ? 1 : 0,
-      }}
-      transition={{
-        duration: 0.9,
-        ease: [0.65, 0, 0.35, 1],
-      }}
-      className="absolute right-0 top-0 flex h-full w-1/2 items-start justify-center overflow-y-auto bg-white px-10 py-8 lg:px-14"
+    <div
+      className={`w-full md:w-1/2 md:absolute md:right-0 md:top-0 h-full flex items-start justify-center bg-white px-4 py-6 sm:px-8 md:px-10 lg:px-14 overflow-y-auto transition-transform duration-700 ${
+        isSignup
+          ? "flex md:translate-x-0 md:opacity-100"
+          : "hidden md:flex md:translate-x-full md:opacity-0"
+      }`}
     >
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-[360px] sm:max-w-md mx-auto my-auto py-2">
         {/* Logo */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-8 flex items-center justify-center gap-4"
-        >
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-blue-600 text-2xl font-bold text-white shadow-xl">
+        <div className="mb-4 sm:mb-6 flex items-center justify-center gap-3">
+          <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-blue-600 text-lg sm:text-xl font-bold text-white shadow-lg">
             S
           </div>
 
           <div>
-            <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">
+            <h2 className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 leading-tight">
               Search&Track
             </h2>
-            <p className="text-xs text-slate-500">AI Powered Job Tracker</p>
+            <p className="text-[11px] text-slate-500">AI Powered Job Tracker</p>
           </div>
-        </motion.div>
+        </div>
 
         {/* Heading */}
-        <motion.h1
-          initial={{ opacity: 0, y: -15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-2 text-center text-[42px] font-extrabold tracking-tight text-slate-900"
-        >
+        <h1 className="mb-1 text-center text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
           Create Account
-        </motion.h1>
+        </h1>
 
-        <p className="mb-8 text-center leading-7 text-slate-500">
+        <p className="mb-4 text-center text-xs text-slate-500 max-w-xs mx-auto">
           Join thousands of job seekers and manage your career in one place.
         </p>
 
-        {/* Side-by-side Social Buttons */}
-        <div className="mb-6 flex justify-center gap-4">
+        {/* Social Buttons */}
+        <div className="mb-4 flex justify-center gap-3">
           <button
             type="button"
             onClick={() => handleGoogleAuth()}
-            className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:bg-slate-50 hover:shadow-md"
+            className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-xl border border-slate-200 bg-white shadow-sm transition hover:bg-slate-50 cursor-pointer"
           >
-            <FcGoogle size={24} />
+            <FcGoogle size={20} />
           </button>
 
           <button
             type="button"
             onClick={handleGitHubLogin}
-            className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:bg-slate-50 hover:shadow-md"
+            className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-xl border border-slate-200 bg-white shadow-sm transition hover:bg-slate-50 cursor-pointer"
           >
-            <FaGithub size={22} className="text-slate-800" />
+            <FaGithub size={18} className="text-slate-800" />
           </button>
         </div>
 
-        <p className="mb-7 text-center text-sm text-slate-400">
+        <p className="mb-4 text-center text-xs text-slate-400">
           or create your account with email
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="relative">
-            <FiUser
-              size={20}
-              className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"
-            />
-            <input
-              type="text"
-              placeholder="First Name"
-              value={formData.firstname}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  firstname: e.target.value,
-                })
-              }
-              className="auth-input !pl-14"
-              required
-            />
+        <form onSubmit={handleSubmit} className="space-y-3">
+          {/* Name Row (Side by side on small screens too) */}
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+            <div className="relative">
+              <FiUser
+                size={16}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+              />
+              <input
+                type="text"
+                placeholder="First Name"
+                value={formData.firstname}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    firstname: e.target.value,
+                  })
+                }
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 py-2.5 pl-9 pr-2 text-xs sm:text-sm outline-none transition focus:border-violet-600 focus:bg-white focus:ring-2 focus:ring-violet-100"
+                required
+              />
+            </div>
+
+            <div className="relative">
+              <FiUser
+                size={16}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+              />
+              <input
+                type="text"
+                placeholder="Last Name"
+                value={formData.lastname}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    lastname: e.target.value,
+                  })
+                }
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 py-2.5 pl-9 pr-2 text-xs sm:text-sm outline-none transition focus:border-violet-600 focus:bg-white focus:ring-2 focus:ring-violet-100"
+                required
+              />
+            </div>
           </div>
 
-          <div className="relative">
-            <FiUser
-              size={20}
-              className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"
-            />
-            <input
-              type="text"
-              placeholder="Last Name"
-              value={formData.lastname}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  lastname: e.target.value,
-                })
-              }
-              className="auth-input !pl-14"
-              required
-            />
-          </div>
-
+          {/* Email */}
           <div className="relative">
             <FiMail
-              size={20}
-              className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"
+              size={16}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
             />
             <input
               type="email"
@@ -237,15 +227,16 @@ function SignupForm({ isSignup }) {
                   email: e.target.value,
                 })
               }
-              className="auth-input !pl-14"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/60 py-2.5 pl-9 pr-3 text-xs sm:text-sm outline-none transition focus:border-violet-600 focus:bg-white focus:ring-2 focus:ring-violet-100"
               required
             />
           </div>
 
+          {/* Password */}
           <div className="relative">
             <FiLock
-              size={20}
-              className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"
+              size={16}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
             />
             <input
               type={showPassword ? "text" : "password"}
@@ -257,34 +248,23 @@ function SignupForm({ isSignup }) {
                   password: e.target.value,
                 })
               }
-              className="auth-input !pl-14 !pr-14"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/60 py-2.5 pl-9 pr-9 text-xs sm:text-sm outline-none transition focus:border-violet-600 focus:bg-white focus:ring-2 focus:ring-violet-100"
               required
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-violet-600"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-violet-600 cursor-pointer"
             >
-              {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+              {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
             </button>
           </div>
 
-          <div>
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-xs text-slate-500">Password Strength</span>
-              <span className="text-xs font-semibold text-green-600">
-                Strong
-              </span>
-            </div>
-            <div className="h-2 overflow-hidden rounded-full bg-slate-200">
-              <div className="h-full w-4/5 rounded-full bg-gradient-to-r from-violet-600 to-blue-600"></div>
-            </div>
-          </div>
-
+          {/* Confirm Password */}
           <div className="relative">
             <FiLock
-              size={20}
-              className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"
+              size={16}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
             />
             <input
               type={showConfirmPassword ? "text" : "password"}
@@ -296,62 +276,47 @@ function SignupForm({ isSignup }) {
                   confirmPassword: e.target.value,
                 })
               }
-              className="auth-input !pl-14 !pr-14"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/60 py-2.5 pl-9 pr-9 text-xs sm:text-sm outline-none transition focus:border-violet-600 focus:bg-white focus:ring-2 focus:ring-violet-100"
               required
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-violet-600"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-violet-600 cursor-pointer"
             >
-              {showConfirmPassword ? (
-                <FiEyeOff size={20} />
-              ) : (
-                <FiEye size={20} />
-              )}
+              {showConfirmPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
             </button>
           </div>
 
-          <label className="mt-6 flex cursor-pointer items-start gap-3 text-sm text-slate-500">
+          {/* Terms checkbox */}
+          <label className="mt-3 flex cursor-pointer items-start gap-2 text-[11px] sm:text-xs text-slate-500">
             <input
               type="checkbox"
-              className="mt-1 h-4 w-4 accent-violet-600"
+              className="mt-0.5 h-3.5 w-3.5 accent-violet-600 rounded"
               required
             />
             <span>
               I agree to the{" "}
-              <span className="font-semibold text-violet-600">
-                Terms of Service
-              </span>{" "}
-              and{" "}
-              <span className="font-semibold text-violet-600">
-                Privacy Policy
-              </span>
-              .
+              <span className="font-semibold text-violet-600">Terms of Service</span> and{" "}
+              <span className="font-semibold text-violet-600">Privacy Policy</span>.
             </span>
           </label>
 
-          <motion.button
+          {/* Submit Button */}
+          <button
             type="submit"
-            whileHover={{
-              scale: 1.03,
-              y: -2,
-            }}
-            whileTap={{
-              scale: 0.97,
-            }}
-            className="primary-btn mt-8 flex items-center justify-center gap-2"
+            className="w-full flex items-center justify-center gap-2 rounded-xl bg-violet-600 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-white shadow-md shadow-violet-200 hover:bg-violet-700 transition cursor-pointer mt-4"
           >
-            Create Account
-            <span className="text-lg">→</span>
-          </motion.button>
+            <span>Create Account</span>
+            <span className="text-base sm:text-lg">→</span>
+          </button>
         </form>
 
-        <p className="mt-6 text-center text-xs leading-6 text-slate-400">
+        <p className="mt-4 text-center text-[10px] leading-4 text-slate-400">
           Your information is encrypted and securely stored.
         </p>
       </div>
-    </motion.div>
+    </div>
   );
 }
 

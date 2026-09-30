@@ -18,7 +18,7 @@ function LoginForm({ isSignup }) {
     password: "",
   });
 
-  // GitHub Callback Handler (URL se code nikal kar backend bhejna)
+  // GitHub Callback Handler
   useEffect(() => {
     const code = searchParams.get("code");
 
@@ -65,8 +65,6 @@ function LoginForm({ isSignup }) {
           withCredentials: true,
         }
       );
-
-      console.log("Login Response Data:", response.data);
 
       if (response.data.token) {
         localStorage.setItem("token", response.data.token);
@@ -137,81 +135,70 @@ function LoginForm({ isSignup }) {
     window.location.href = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${redirectUri}&scope=user:email`;
   };
 
+  // Mobile par agar user Signup state me hai toh login form screen se hide rahega
+  if (typeof window !== "undefined" && window.innerWidth < 768 && isSignup) {
+    return null;
+  }
+
   return (
-    <motion.div
-      animate={{
-        x: isSignup ? "-100%" : "0%",
-        opacity: isSignup ? 0 : 1,
-      }}
-      transition={{
-        duration: 0.9,
-        ease: [0.65, 0, 0.35, 1],
-      }}
-      className="absolute left-0 top-0 flex h-full w-1/2 items-center justify-center bg-white px-14"
+    <div
+      className={`w-full md:w-1/2 md:absolute md:left-0 md:top-0 min-h-screen md:min-h-full flex items-center justify-center bg-white px-4 py-8 sm:px-8 md:px-10 lg:px-12 z-10 transition-transform duration-700 ${
+        isSignup ? "hidden md:flex md:-translate-x-full md:opacity-0" : "flex md:translate-x-0 md:opacity-100"
+      }`}
     >
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-[360px] sm:max-w-sm mx-auto flex flex-col justify-center">
         {/* Logo */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-8 flex items-center justify-center gap-4"
-        >
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-blue-600 text-2xl font-bold text-white shadow-xl">
+        <div className="mb-5 sm:mb-6 flex items-center justify-center gap-3">
+          <div className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-blue-600 text-lg font-bold text-white shadow-md">
             S
           </div>
 
           <div>
-            <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">
+            <h2 className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 leading-tight">
               Search&Track
             </h2>
-            <p className="text-xs text-slate-500">AI Powered Job Tracker</p>
+            <p className="text-[11px] text-slate-500">AI Powered Job Tracker</p>
           </div>
-        </motion.div>
+        </div>
 
         {/* Heading */}
-        <motion.h1
-          initial={{ opacity: 0, y: -15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-2 text-center text-[42px] font-extrabold tracking-tight text-slate-900"
-        >
+        <h1 className="mb-1 text-center text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
           Welcome Back
-        </motion.h1>
+        </h1>
 
-        <p className="mb-8 text-center leading-7 text-slate-500">
-          Track applications, interviews and offers from one beautiful dashboard.
+        <p className="mb-5 text-center text-xs text-slate-500 max-w-xs mx-auto">
+          Track applications, interviews and offers from one dashboard.
         </p>
 
-        {/* Side-by-side Circular Social Buttons */}
-        <div className="mb-5 flex items-center justify-center gap-4">
+        {/* Social Buttons */}
+        <div className="mb-4 flex items-center justify-center gap-3">
           <button
             type="button"
             onClick={() => handleGoogleAuth()}
-            className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:bg-slate-50 hover:shadow-md"
+            className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-xl border border-slate-200 bg-white shadow-sm transition hover:bg-slate-50 cursor-pointer"
           >
-            <FcGoogle size={24} />
+            <FcGoogle size={20} />
           </button>
 
           <button
             type="button"
             onClick={handleGitHubLogin}
-            className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:bg-slate-50 hover:shadow-md"
+            className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-xl border border-slate-200 bg-white shadow-sm transition hover:bg-slate-50 cursor-pointer"
           >
-            <FaGithub size={22} className="text-slate-800" />
+            <FaGithub size={18} className="text-slate-800" />
           </button>
         </div>
 
-        <p className="mb-7 text-center text-sm text-slate-400">
+        <p className="mb-4 text-center text-xs text-slate-400">
           or continue with email
         </p>
 
         {/* Email & Password Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           <div className="relative">
             <FiMail
-              size={20}
-              className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"
+              size={16}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
             />
             <input
               type="email"
@@ -223,15 +210,15 @@ function LoginForm({ isSignup }) {
                   email: e.target.value,
                 })
               }
-              className="auth-input !pl-14"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/60 py-2.5 pl-10 pr-3 text-xs sm:text-sm outline-none transition focus:border-violet-600 focus:bg-white focus:ring-2 focus:ring-violet-100"
               required
             />
           </div>
 
           <div className="relative">
             <FiLock
-              size={20}
-              className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"
+              size={16}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
             />
             <input
               type={showPassword ? "text" : "password"}
@@ -243,60 +230,53 @@ function LoginForm({ isSignup }) {
                   password: e.target.value,
                 })
               }
-              className="auth-input !pl-14 !pr-14"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/60 py-2.5 pl-10 pr-10 text-xs sm:text-sm outline-none transition focus:border-violet-600 focus:bg-white focus:ring-2 focus:ring-violet-100"
               required
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-violet-600"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-violet-600 cursor-pointer"
             >
-              {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+              {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
             </button>
           </div>
 
           {/* Remember Me */}
-          <div className="mt-6 flex items-center justify-between text-sm">
-            <label className="flex cursor-pointer items-center gap-2 text-slate-500">
+          <div className="flex items-center justify-between text-xs pt-0.5">
+            <label className="flex cursor-pointer items-center gap-1.5 text-slate-500">
               <input
                 type="checkbox"
-                className="h-4 w-4 accent-violet-600"
+                className="h-3.5 w-3.5 accent-violet-600 rounded"
               />
               Remember me
             </label>
             <button
               type="button"
-              className="font-medium text-violet-600 transition hover:text-violet-700 hover:underline"
+              className="font-medium text-violet-600 hover:text-violet-700 hover:underline"
             >
               Forgot Password?
             </button>
           </div>
 
           {/* Sign In Button */}
-          <motion.button
+          <button
             type="submit"
-            whileHover={{
-              scale: 1.03,
-              y: -2,
-            }}
-            whileTap={{
-              scale: 0.97,
-            }}
-            className="primary-btn mt-8 flex items-center justify-center gap-2"
+            className="w-full flex items-center justify-center gap-2 rounded-xl bg-violet-600 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md shadow-violet-200 hover:bg-violet-700 transition cursor-pointer mt-4"
           >
-            Sign In
-            <span className="text-lg">→</span>
-          </motion.button>
+            <span>Sign In</span>
+            <span>→</span>
+          </button>
         </form>
 
         {/* Footer */}
-        <p className="mt-6 text-center text-xs leading-6 text-slate-400">
+        <p className="mt-5 text-center text-[10px] leading-4 text-slate-400">
           Protected with industry-standard encryption.
           <br />
           Your personal data is always secure.
         </p>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
